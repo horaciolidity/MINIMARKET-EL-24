@@ -6,6 +6,7 @@
     <title>MINIMARKET EL 24</title>
     <link rel="stylesheet" href="styles.css">
 
+
 </head>
 <body>
 
@@ -20,8 +21,10 @@
 <img src="https://minimarket-el-24.vercel.app/photo_5107626364999151514_y.jpg" alt="Fondo" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100%; height: 100px; object-fit: cover; z-index: 1; opacity: 0.5;">
             
         </div>
-  
+ 
+
     <section>
+         
   <h2>Apertura de Caja</h2>
   <input type="number" id="opening-cash" placeholder="Monto inicial">
   <button onclick="setOpeningCash()">Iniciar Caja</button>
@@ -51,7 +54,7 @@
     <input type="number" id="product-quantity" placeholder="Cantidad" min="1"> <!-- Campo de cantidad -->
           
    
-    <button onclick="addProduct()">Agregar Producto</button>
+    <button class="admin-only" onclick="addProduct()">Agregar Producto</button>
 </section>
 
 
@@ -76,6 +79,7 @@
   <button onclick="finalizeSale('efectivo')">Pago en Efectivo</button>
   <button onclick="finalizeSale('transferencia')">Pago Transferido</button>
   <button onclick="asignarAVentaCliente()">Asignar a Cliente</button>
+
 </div>
 
 
@@ -87,8 +91,8 @@
 
     
      <div style="text-align: center;">
-            <button class="action-button" onclick="consultarTotalVendido()" style="padding: 5px 10px; font-size: 0.9em; border-radius: 15px; background-color: #007bff; color: white; margin: 5px; border: none; cursor: pointer;">Consultar Total Vendido</button>
-<button class="action-button"
+            <button class="admin-only" class="action-button" onclick="consultarTotalVendido()" style="padding: 5px 10px; font-size: 0.9em; border-radius: 15px; background-color: #007bff; color: white; margin: 5px; border: none; cursor: pointer;">Consultar Total Vendido</button>
+<button class="admin-only" class="action-button"
         onclick="limpiarTotalVendido()"
         style="display: none; padding: 5px 10px; font-size: 0.9em; border-radius: 15px; background-color: #dc3545; color: white; margin: 5px; border: none; cursor: pointer;">
   Limpiar Total Vendido
@@ -131,8 +135,8 @@
 
       <div>
         <input type="file" id="fileInput" accept=".txt">
-        <button onclick="loadProducts()">Cargar Productos</button>
-        <button onclick="downloadProducts()">Descargar Productos</button>
+        <button class="admin-only" onclick="loadProducts()">Cargar Productos</button>
+        <button class="admin-only" onclick="downloadProducts()">Descargar Productos</button>
 
     </div>                     
 
@@ -154,6 +158,8 @@
     <div class="spinner"></div>
     <img src="https://minimarket-el-24.vercel.app/photo_5107626364999151514_y.jpg" alt="Imagen de Carga" id="loading-image">
 </div>
+  
+
 
 <!-- ────────────────────────── MODAL CLIENTES ────────────────────────── -->
 <div id="modal-clientes" class="modal" style="display:none;">
@@ -231,7 +237,7 @@
 <!-- ───────────────────────────────────────────────────────────────────── -->
 
 
-     <script src="scripts.js"></script>
+    <script src="scripts.js"></script>
     <script src="emisor-cliente.js"></script> <!-- 👉 nuevo -->
     <script src="clientes.js"></script>        <!-- NUEVO -->
     <script src="arqueo-mensual.js"></script>  <!-- NUEVO -->
