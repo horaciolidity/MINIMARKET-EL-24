@@ -10,7 +10,9 @@
 <body>
 
   
-
+<button id="logoutBtn" style="position:absolute; top:10px; right:10px;">
+  Cerrar sesión
+</button>
     
 <div class="container">
         <div class="header" style="position: relative; text-align: center; margin-bottom: 20px;">
@@ -73,6 +75,7 @@
 
   <button onclick="finalizeSale('efectivo')">Pago en Efectivo</button>
   <button onclick="finalizeSale('transferencia')">Pago Transferido</button>
+  <button onclick="asignarAVentaCliente()">Asignar a Cliente</button>
 </div>
 
 
@@ -107,6 +110,8 @@
   <textarea id="sales-summary" rows="15" style="width:100%; margin-top:10px;"></textarea><br>
   <button onclick="downloadSummary()">Descargar TXT</button>
   <button onclick="resetDay()">Limpiar Total Vendido</button>
+  <button onclick="verArqueoMensual()">Arqueo Mensual</button>
+
 </section>
 
 
@@ -131,6 +136,7 @@
 
     </div>                     
 
+<button onclick="abrirModalClientes()">🗂 Clientes</button>
 
 
     
@@ -149,9 +155,86 @@
     <img src="https://minimarket-el-24.vercel.app/photo_5107626364999151514_y.jpg" alt="Imagen de Carga" id="loading-image">
 </div>
 
+<!-- ────────────────────────── MODAL CLIENTES ────────────────────────── -->
+<div id="modal-clientes" class="modal" style="display:none;">
+  <div class="modal-content" style="max-width:600px;">
+    <span class="close" onclick="cerrarModalClientes()">&times;</span>
+    <h2>Gestión de Clientes</h2>
 
-    <script src="scripts.js"></script>
+    <!-- Formulario alta / edición -->
+    <form id="form-cliente" onsubmit="guardarCliente(event)">
+      <input type="hidden" id="cliente-id">
+      <input type="text"  id="cliente-nombre"   placeholder="Nombre"   required>
+      <input type="text"  id="cliente-telefono" placeholder="Teléfono">
+      <button type="submit">Guardar</button>
+    </form>
+
+    <!-- Tabla listado -->
+    <table style="width:100%; margin-top:15px; text-align:left;">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Teléfono</th>
+          <th>Deuda</th>
+          <th>Acciones</th>
+          <th>Detalle</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-clientes">
+        <!--
+          Cada fila la produces dinámicamente desde tu script.
+          Ejemplo de celda “Detalle” que dispara el modal:
+          <td>
+            <button class="btn-detalle" onclick="abrirDetalleCliente('ID_DEL_CLIENTE')">
+              Ver historial
+            </button>
+          </td>
+        -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ──────────────── MODAL DETALLE HISTORIAL DE VENTAS ──────────────── -->
+<div id="modal-detalle-cliente" class="modal" style="display:none;">
+  <div class="modal-content" style="max-width:700px;">
+    <span class="close" onclick="cerrarModalDetalleCliente()">&times;</span>
+    <!-- El nombre del cliente se inserta dinámicamente -->
+    <h2 id="detalle-nombre-cliente">Historial de ventas</h2>
+
+    <table style="width:100%; text-align:left;">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Hora</th>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Total $</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-detalle-cliente">
+        <!--
+          Aquí tu script inyectará filas así:
+          <tr>
+            <td>28/06/2025</td>
+            <td>17:42</td>
+            <td>Producto X</td>
+            <td>3</td>
+            <td>4500</td>
+          </tr>
+        -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ───────────────────────────────────────────────────────────────────── -->
+
+
+     <script src="scripts.js"></script>
     <script src="emisor-cliente.js"></script> <!-- 👉 nuevo -->
+    <script src="clientes.js"></script>        <!-- NUEVO -->
+    <script src="arqueo-mensual.js"></script>  <!-- NUEVO -->
 
 </body>
 </html>
