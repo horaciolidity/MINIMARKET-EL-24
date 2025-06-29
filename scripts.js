@@ -1,3 +1,27 @@
+let isAdmin = false;
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const session = JSON.parse(localStorage.getItem('currentUser')) || { role: 'empleado' };
+  isAdmin = session.role === 'admin'; 
+
+
+if (!session) {
+  window.location.href = 'login_empleado.html';
+}
+  if (!isAdmin) {
+    document.querySelectorAll('.admin-only').forEach(btn => {
+     
+      btn.disabled = true;
+    });
+  }
+});
+
+
+
+
+
 document.addEventListener('DOMContentLoaded', () => {
     displayProducts();
     updateTotalPrice();
@@ -6,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const yaInicioCaja = localStorage.getItem('openingCashSet') === 'true';
     if (yaInicioCaja) input.disabled = true;
 
-    // Animación de carga (si existe)
     setTimeout(() => {
         const loadingScreen = document.getElementById('loading-screen');
         if (loadingScreen) {
@@ -117,7 +140,6 @@ function displayProducts() {
     });
 }
 
-// Nueva función para actualizar el producto
 function updateProduct(code) {
     const products = getProducts();
     const product = products.find(p => p.code === code);
@@ -125,9 +147,9 @@ function updateProduct(code) {
     if (newQuantity !== null) {
         const quantityNumber = parseInt(newQuantity);
         if (quantityNumber >= 0) {
-            product.quantity = quantityNumber; // Actualiza la cantidad del producto
-            saveProducts(products); // Guarda el inventario actualizado
-            displayProducts(); // Actualiza la vista de productos
+            product.quantity = quantityNumber; 
+            saveProducts(products); 
+            displayProducts(); 
             updateTotalPrice();
             enviarCarritoAlCliente();
 
@@ -168,18 +190,15 @@ function scanProduct() {
         const cartList = document.getElementById('cart');
         const existingItem = Array.from(cartList.children).find(item => item.dataset.code === product.code);
 
-        // Verifica si el producto ya está en el carrito
         if (existingItem) {
-            // Solo se actualiza la cantidad en el carrito, no se descuenta del inventario
             const quantitySpan = existingItem.querySelector('.quantity');
-            const newQuantity = parseInt(quantitySpan.textContent) + 1; // Incrementa la cantidad en el carrito
-            quantitySpan.textContent = newQuantity; // Actualiza la cantidad en la interfaz
+            const newQuantity = parseInt(quantitySpan.textContent) + 1; 
+            quantitySpan.textContent = newQuantity; 
         } else {
-            // Solo se añade al carrito si hay stock
             addToCart(product);
-            document.getElementById('scan-code').value = ''; // Limpia el campo de escaneo
-            updateTotalPrice(); // Actualiza el total
-            checkStock(product); // Verifica el stock y muestra alertas
+            document.getElementById('scan-code').value = ''; 
+            updateTotalPrice(); 
+            checkStock(product);
         }
     } else {
         alert('Producto no encontrado');
@@ -359,77 +378,87 @@ function checkout() {
                 hasStockIssue = true; 
                 return; 
             }
-            quantitiesToDeduct[productCode] = quantity; // Almacena la cantidad a deducir
+            quantitiesToDeduct[productCode] = quantity; 
         }
     });
 
     if (hasStockIssue) {
-        return; // Detener si hay problemas de stock
+        return; 
     }
 
-   // Actualizar el inventario
 Object.entries(quantitiesToDeduct).forEach(([code, quantity]) => {
     const product = products.find(p => p.code === code);
     if (product) {
-        product.quantity -= quantity; // Restar la cantidad vendida
-        product.sold = (product.sold || 0) + quantity; // Registrar la cantidad vendida
+        product.quantity -= quantity;
+        product.sold = (product.sold || 0) + quantity; 
     }
 });
 
-    saveProducts(products); // Guarda el inventario actualizado
-    document.getElementById('cart').innerHTML = ''; // Limpiar el carrito
-    document.getElementById('total-price').textContent = '0.00'; // Resetear total
+    saveProducts(products); 
+    document.getElementById('cart').innerHTML = ''; 
+    document.getElementById('total-price').textContent = '0.00'; 
     alert('Compra finalizada. El inventario ha sido actualizado.');
 
-    displayProducts(); // Actualiza la vista
+    displayProducts(); 
 }
 
 function consultarTotalVendido() {
-    const totalVendido = localStorage.getItem('totalVendido');
-    const ventasModal = document.getElementById('ventas-modal');
-    const ventasDetalle = document.getElementById('ventas-detalle');
-    const totalVendidoModal = document.getElementById('total-vendido-modal');
+    const totalVendido        = localStorage.getItem('totalVendido') || '0.00';
+    const ventasModal         = document.getElementById('ventas-modal');
+    const ventasDetalle       = document.getElementById('ventas-detalle');
+    const totalVendidoModal   = document.getElementById('total-vendido-modal');
 
-    ventasDetalle.innerHTML = ''; // Limpiar el detalle de ventas
+    ventasDetalle.innerHTML = '';
+
     const products = getProducts();
-
-    let productosVendidos = '';
-    products.forEach(product => {
-       if (product.sold > 0) { 
-    productosVendidos += `
-        <li>${product.name} - Precio: $${product.price} - Cantidad vendida: ${product.sold}</li>
-    `;
-}
-
+    let productosHtml = '';
+    products.forEach(p => {
+        if (p.sold > 0) {
+            productosHtml += `
+                <li>${p.name} - Precio: $${p.price} - Cantidad vendida: ${p.sold}</li>
+            `;
+        }
     });
+    if (!productosHtml) productosHtml = '<li>No hay productos vendidos aún.</li>';
 
-    ventasDetalle.innerHTML = productosVendidos || '<li>No hay productos vendidos aún.</li>';
-    totalVendidoModal.textContent = totalVendido ? totalVendido : '0.00';
-    
-    ventasModal.style.display = 'block'; // Mostrar el modal
+    const clientes  = JSON.parse(localStorage.getItem('clientes')) || [];
+    const deudores  = clientes.filter(c => parseFloat(c.saldo || 0) > 0);
+
+    let deudoresHtml = '';
+    let totalDeuda   = 0;
+
+    if (deudores.length > 0) {
+        deudoresHtml += '<hr><h3>Clientes con deuda</h3>';
+        deudores.forEach((c, i) => {
+            const deuda = parseFloat(c.saldo).toFixed(2);
+            totalDeuda += parseFloat(c.saldo);
+            deudoresHtml += `<li>${i + 1}. ${c.nombre} — Tel: ${c.telefono || '---'} — Debe $${deuda}</li>`;
+        });
+        deudoresHtml += `<p><strong>Total deuda acumulada: $${totalDeuda.toFixed(2)}</strong></p>`;
+    } else {
+        deudoresHtml += '<p>No hay clientes con deuda.</p>';
+    }
+
+    ventasDetalle.innerHTML  = productosHtml + deudoresHtml;
+    totalVendidoModal.textContent = totalVendido;
+    ventasModal.style.display = 'block';
 }
 
-// Cerrar el modal
-const closeModal = document.querySelector('.close');
-closeModal.onclick = function() {
-    document.getElementById('ventas-modal').style.display = 'none';
-};
+document.querySelector('.close').onclick = () =>
+  document.getElementById('ventas-modal').style.display = 'none';
 
-// Descargar detalle de ventas
+
 function downloadVentas() {
     const totalVendido = localStorage.getItem('totalVendido') || '0.00';
-    const products = getProducts(); // Asegúrate de que esta función trae correctamente los productos
+    const products = getProducts(); 
     let detalle = `Total Vendido: $${totalVendido}\n\nProductos Vendidos:\n`;
 
-    // Iterar sobre los productos vendidos
     products.forEach(product => {
-        // Solo incluir los productos que se vendieron
         if (product.sold && product.sold > 0) {
             detalle += `${product.name} - Precio: $${product.price} - Cantidad vendida: ${product.sold}\n`;
         }
     });
 
-    // Generar archivo de texto
     const blob = new Blob([detalle], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -440,7 +469,6 @@ function downloadVentas() {
     document.body.removeChild(a);
 }
 
-// Detectar clic fuera del modal para cerrar
 window.onclick = function(event) {
     const ventasModal = document.getElementById('ventas-modal');
     if (event.target === ventasModal) {
@@ -452,36 +480,28 @@ window.onclick = function(event) {
 
 
 function limpiarTotalVendido() {
-    // Borrar total de vendido (por compatibilidad)
     localStorage.removeItem('totalVendido');
-
-    // Borrar historial real de ventas
-    localStorage.removeItem('ventas');
-
-    // Borrar apertura de caja
     localStorage.removeItem('openingCash');
     localStorage.setItem('openingCashSet', 'false');
 
-    // Resetear 'sold' en los productos
     const products = getProducts();
     products.forEach(product => {
         product.sold = 0;
     });
     saveProducts(products);
 
-    // Actualizar interfaz
     displayProducts();
     document.getElementById("sales-summary").value = '';
     document.getElementById("opening-cash").disabled = false;
 
-    alert('Turno reiniciado. Todo el historial fue limpiado.');
-     if (typeof resetCliente === 'function') {
+    alert('Turno reiniciado. Historial mensual conservado.');
+
+    if (typeof resetCliente === 'function') {
         resetCliente();
     }
 }
 
 
-document.getElementById('fileInput').addEventListener('change', handleFileSelect, false);
 
 function handleFileSelect(event) {
     const file = event.target.files[0];
@@ -505,18 +525,18 @@ function parseProducts(contents) {
     const lines = contents.split('\n');
     const products = lines.map(line => {
         const parts = line.split(',');
-        if (parts.length !== 4) { // Ahora esperamos 4 partes: código, nombre, precio y cantidad
+        if (parts.length !== 4) { 
             console.error('Formato de producto inválido:', line);
-            return null; // Omitir líneas mal formateadas
+            return null;
         }
         const [code, name, price, quantity] = parts;
         return {
             code: code.trim(),
             name: name.trim(),
             price: parseFloat(price.trim()),
-            quantity: parseInt(quantity.trim()) // Procesar la cantidad
+            quantity: parseInt(quantity.trim())
         };
-    }).filter(product => product !== null); // Filtrar productos nulos
+    }).filter(product => product !== null);
     return products;
 }
 
@@ -562,7 +582,6 @@ function getOpeningCash() {
     return parseFloat(localStorage.getItem('openingCash')) || 0;
 }
 
-// Guardar una venta en LocalStorage
 function saveSale(cart, paymentMethod) {
     const sales = JSON.parse(localStorage.getItem('sales')) || [];
     const timestamp = new Date().toLocaleString();
@@ -571,119 +590,139 @@ function saveSale(cart, paymentMethod) {
 }
 
 function finalizeSale(method) {
+  
   const cartItems = document.querySelectorAll('#cart li');
   if (cartItems.length === 0) {
     alert('El carrito está vacío');
     return;
   }
 
-  const cart = [];
   const products = getProducts();
-  let hasStockIssue = false;
+  const cart     = [];
+  let   hasStock = false;
 
+  
   cartItems.forEach(item => {
-    const code = item.dataset.code;
-    const quantity = parseFloat(item.querySelector('.quantity').textContent);
+    const code       = item.dataset.code;
+    const quantity   = parseFloat(item.querySelector('.quantity').textContent);
     const totalPrice = parseFloat(item.querySelector('.price').textContent);
-    const product = products.find(p => p.code === code);
+    const product    = products.find(p => p.code === code);
 
     if (product && product.quantity >= quantity) {
       product.quantity -= quantity;
-      product.sold = (product.sold || 0) + quantity;
+      product.sold      = (product.sold || 0) + quantity;
     } else {
-      alert(`No hay suficiente stock de ${product.name}`);
-      hasStockIssue = true;
+      alert(`No hay suficiente stock de ${product?.name || code}`);
+      hasStock = true;
     }
-
-    const unitPrice = totalPrice / quantity;
 
     cart.push({
       code,
       name: product.name,
-      price: unitPrice,
+      price: totalPrice / quantity,  
       quantity,
       cost: product.cost || 0
     });
   });
 
-  if (hasStockIssue) return;
+  if (hasStock) return;   
+  const novedades      = prompt("¿Desea agregar alguna novedad sobre esta venta? (opcional)") || "";
+  const fechaObj       = new Date();
+  const timestamp      = fechaObj.toLocaleString();  
+  const timestampIso   = fechaObj.toISOString();     
+  const timestampMs    = fechaObj.getTime();         
 
-  const novedades = prompt("¿Desea agregar alguna novedad sobre esta venta? (opcional)") || "";
+  const venta = { cart, paymentMethod: method, timestamp, timestampIso, timestampMs, novedades };
+
+ 
   const sales = JSON.parse(localStorage.getItem('sales')) || [];
-  const timestamp = new Date().toLocaleString();
-  sales.push({ cart, paymentMethod: method, timestamp, novedades });
+  sales.push(venta);
   localStorage.setItem('sales', JSON.stringify(sales));
 
-  // ✅ ACTUALIZAR totalVendido
-  const totalVenta = cart.reduce((acc, p) => acc + (p.price * p.quantity), 0);
-  let totalVendido = parseFloat(localStorage.getItem('totalVendido')) || 0;
-  totalVendido += totalVenta;
-  localStorage.setItem('totalVendido', totalVendido.toFixed(2));
+  
+  const totalVenta   = cart.reduce((acc, p) => acc + (p.price * p.quantity), 0);
+  const totalVendido = parseFloat(localStorage.getItem('totalVendido')) || 0;
+  localStorage.setItem('totalVendido', (totalVendido + totalVenta).toFixed(2));
+
 
   saveProducts(products);
   document.getElementById('cart').innerHTML = '';
   document.getElementById('total-price').textContent = '0.00';
-  alert('Venta registrada con pago: ' + method);
+  alert(`Venta registrada con pago: ${method}`);
+
   displayProducts();
   updateTotalPrice();
 
-    
-const canal = new BroadcastChannel('pos_channel');
-canal.postMessage({ tipo: 'despedida' });
+ 
+  const canal = new BroadcastChannel('pos_channel');
+  canal.postMessage({ tipo: 'despedida' });
 }
 
 function showSalesSummary() {
-    const sales = JSON.parse(localStorage.getItem('sales')) || [];
-    let summary = '';
-    let totalCash = 0;
-    let totalTransfer = 0;
-    let totalCostos = 0;
-    let totalGanancia = 0;
+  
+  const sales = JSON.parse(localStorage.getItem('sales')) || [];
 
-    sales.forEach((sale, index) => {
-        summary += `🧾 Venta #${index + 1} - ${sale.timestamp} - Método: ${sale.paymentMethod}\n`;
+  
+  let summary        = '';
+  let totalCash      = 0;
+  let totalTransfer  = 0;
+  let totalCliente   = 0;
+  let totalCostos    = 0;
+  let totalGanancia  = 0;
 
-        sale.cart.forEach(p => {
-            const quantity = parseFloat(p.quantity);
-            const price = parseFloat(p.price);
-            const cost = parseFloat(p.cost || 0);
-            const subtotal = price * quantity;
-            const costoTotal = cost * quantity;
-            const ganancia = subtotal - costoTotal;
+ 
+  sales.forEach((sale, index) => {
+    summary += `🧾 Venta #${index + 1} - ${sale.timestamp} - Método: ${sale.paymentMethod}\n`;
 
-            summary += `  🛒 ${quantity} x ${p.name} | Precio u.: $${price.toFixed(2)} | Costo u.: $${cost.toFixed(2)} | Subtotal: $${subtotal.toFixed(2)} | Ganancia: $${ganancia.toFixed(2)}\n`;
+    let ventaSubtotal = 0;
+    let ventaCosto    = 0;
 
-            totalCostos += costoTotal;
-        });
+    sale.cart.forEach(p => {
+      const q        = parseFloat(p.quantity);
+      const priceU   = parseFloat(p.price);
+      const costU    = parseFloat(p.cost || 0);
+      const subTotal = q * priceU;
+      const costTot  = q * costU;
+      const profit   = subTotal - costTot;
 
-        const totalVenta = sale.cart.reduce((acc, p) => acc + (p.price * p.quantity), 0);
-        const totalCosto = sale.cart.reduce((acc, p) => acc + ((p.cost || 0) * p.quantity), 0);
-        const gananciaVenta = totalVenta - totalCosto;
-        totalGanancia += gananciaVenta;
+      ventaSubtotal += subTotal;
+      ventaCosto    += costTot;
 
-        summary += `  💲 Total venta: $${totalVenta.toFixed(2)}\n`;
-        summary += `  📦 Costo total: $${totalCosto.toFixed(2)}\n`;
-        summary += `  📈 Ganancia: $${gananciaVenta.toFixed(2)}\n`;
-
-        if (sale.novedades && sale.novedades.trim() !== "") {
-            summary += `  📝 Novedades: ${sale.novedades}\n`;
-        }
-
-        summary += '\n';
-
-        if (sale.paymentMethod.toLowerCase().includes("efectivo")) totalCash += totalVenta;
-        if (sale.paymentMethod.toLowerCase().includes("transfer")) totalTransfer += totalVenta;
+      summary += `  🛒 ${q} x ${p.name} | Precio u.: $${priceU.toFixed(2)} | Costo u.: $${costU.toFixed(2)} | Subtotal: $${subTotal.toFixed(2)} | Ganancia: $${profit.toFixed(2)}\n`;
     });
 
-    summary += `\n🔓 Apertura de caja: $${getOpeningCash().toFixed(2)}`;
-    summary += `\n💰 Total efectivo: $${totalCash.toFixed(2)}`;
-    summary += `\n💳 Total transferencia: $${totalTransfer.toFixed(2)}`;
-    summary += `\n📦 Costo total de productos vendidos: $${totalCostos.toFixed(2)}`;
-    summary += `\n📈 Ganancia total: $${totalGanancia.toFixed(2)}`;
-    summary += `\n💵 Total vendido: $${(totalCash + totalTransfer).toFixed(2)}`;
+    const gananciaVenta = ventaSubtotal - ventaCosto;
+    totalCostos   += ventaCosto;
+    totalGanancia += gananciaVenta;
 
-    const textarea = document.getElementById('sales-summary');
-    textarea.value = summary;
+    summary += `  💲 Total venta: $${ventaSubtotal.toFixed(2)}\n`;
+    summary += `  📦 Costo total: $${ventaCosto.toFixed(2)}\n`;
+    summary += `  📈 Ganancia: $${gananciaVenta.toFixed(2)}\n`;
+
+    if (sale.novedades && sale.novedades.trim() !== '') {
+      summary += `  📝 Novedades: ${sale.novedades}\n`;
+    }
+    summary += '\n';
+
+    const method = sale.paymentMethod.toLowerCase();
+    if (method.includes('efectivo'))        totalCash     += ventaSubtotal;
+    else if (method.includes('transfer'))   totalTransfer += ventaSubtotal;
+    else if (method.includes('cuenta'))     totalCliente  += ventaSubtotal;
+  });
+
+
+  const totalFacturado = totalCash + totalTransfer + totalCliente;
+
+  summary += `🔓 Apertura de caja: $${getOpeningCash().toFixed(2)}\n`;
+  summary += `💰 Total efectivo: $${totalCash.toFixed(2)}\n`;
+  summary += `💳 Total transferencia: $${totalTransfer.toFixed(2)}\n`;
+  summary += `🧾 Total cuenta cliente: $${totalCliente.toFixed(2)}\n`;
+  summary += `📦 Costo total de productos vendidos: $${totalCostos.toFixed(2)}\n`;
+  summary += `📈 Ganancia total: $${totalGanancia.toFixed(2)}\n`;
+  summary += `💵 Total facturado: $${totalFacturado.toFixed(2)}`;
+
+  
+  document.getElementById('sales-summary').value = summary;
 }
 
 
@@ -692,7 +731,6 @@ function showSalesSummary() {
 function payWithTransfer() {
     finalizeSale('Transferido');
 }
-// Descargar el resumen como archivo de texto
 function downloadSummary() {
     const text = document.getElementById('sales-summary').value;
     const blob = new Blob([text], { type: 'text/plain' });
@@ -716,15 +754,17 @@ function saveVentas(ventas) {
 
 
 
-// Función para verificar el stock y mostrar alertas
 function checkStock(product) {
-    if (product.quantity < 5) { // Por ejemplo, menos de 5 unidades
+    if (product.quantity < 5) { 
         alert(`Quedan solo ${product.quantity} unidades de ${product.name}.`);
     }
 }
 
+
+
 function resetDay() {
-    localStorage.removeItem('sales');
+    
+
     localStorage.removeItem('openingCash');
     localStorage.removeItem('openingCashSet');
     localStorage.removeItem('totalVendido');
@@ -738,11 +778,46 @@ function resetDay() {
 
     displayProducts();
 
-    // 👉 Agregado
     if (typeof resetCliente === 'function') {
         resetCliente();
     }
 
-    alert("Caja, ventas y arqueo limpiados exitosamente.");
+    alert("Caja y totales del turno limpiados. Historial mensual conservado.");
 }
 
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  localStorage.removeItem('currentUser');   
+  window.location.href = 'login_empleado.html';
+});
+
+
+
+function mostrarHistorialCliente(idCliente) {
+  const canal = new BroadcastChannel('cliente_channel');
+  canal.postMessage({ tipo: 'mostrar_historial', clienteId: idCliente });
+}
+function ocultarHistorialCliente() {
+  const canal = new BroadcastChannel('cliente_channel');
+  canal.postMessage({ tipo: 'ocultar_historial' });
+}
+
+
+
+function soloAdmin(fn) {
+  return (...args) => {
+    if (!isAdmin) {
+      alert('Acción reservada al administrador');
+      return;
+    }
+    return fn(...args);
+  };
+}
+
+addProduct            = soloAdmin(addProduct);
+deleteProduct         = soloAdmin(deleteProduct);
+editProduct           = soloAdmin(editProduct);
+updateProduct         = soloAdmin(updateProduct);
+consultarTotalVendido = soloAdmin(consultarTotalVendido);
+limpiarTotalVendido   = soloAdmin(limpiarTotalVendido);
+setOpeningCash        = soloAdmin(setOpeningCash);
