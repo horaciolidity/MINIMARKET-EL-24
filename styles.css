@@ -26,7 +26,7 @@ h1 {
 
 h2 {
     text-align: center;
-    color: #ecf0f1; 
+    color: #5d6d7e; 
     font-size: 1.5em; 
     margin: 15px 0; 
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3); 
@@ -260,37 +260,14 @@ ul li:hover {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
-/* Estilos básicos para el modal */
-/* Estilos básicos para el modal */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.8); /* Fondo oscuro con opacidad */
-    backdrop-filter: blur(5px); /* Efecto de desenfoque en el fondo */
-}
 
-.modal-content {
-    background-color: #1e1e1e; /* Fondo oscuro para el contenido del modal */
-    color: #ffffff; /* Texto blanco para contraste */
-    margin: 10% auto;
-    padding: 20px;
-    border: 1px solid #444; /* Bordes más sutiles y oscuros */
-    width: 70%;
-    max-width: 600px; /* Limitar el ancho máximo del modal */
-    border-radius: 10px; /* Bordes redondeados para un estilo moderno */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra suave */
-    text-align: center;
-}
+
+
+
 
 /* Estilo para el botón de cerrar */
 .close {
-    color: #ffffff; /* Texto blanco */
+    color: black; /* Texto blanco */
     float: right;
     font-size: 24px;
     font-weight: bold;
@@ -307,7 +284,7 @@ ul li:hover {
 /* Estilo para los botones dentro del modal */
 .modal button {
     background-color: #444; /* Fondo oscuro en los botones */
-    color: #ffffff; /* Texto blanco */
+    color: black; /* Texto blanco */
     border: none;
     padding: 10px 20px;
     margin: 10px;
@@ -318,4 +295,120 @@ ul li:hover {
 
 .modal button:hover {
     background-color: #555; /* Cambia el fondo al pasar el cursor */
+}
+
+
+
+
+
+
+
+
+
+
+input[type="number"],
+{
+    color: black;
+}
+
+input[type="password"],
+select {
+  background: #fafafa;
+  border: 1px solid #999;
+  color: black;
+}
+input[type="text"],
+{
+    color: black;
+}
+/* Placeholder más oscuro */
+input::placeholder {
+  color: #666;
+}
+
+/* Botones principales */
+button {
+  background-color: #007bff;
+  color: #fff;
+}
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Botones de acción en tablas */
+table button {
+  background-color: #6c757d;
+  color: #fff;
+  border: none;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+table button:hover {
+  background-color: #545b62;
+}
+
+/* Encabezados de la tabla de clientes */
+#tabla-clientes th {
+  color: #5d6d7e;
+  background: #e9ecef;
+}
+
+/* Celdas de la tabla */
+#tabla-clientes td {
+  color: white;
+}
+
+/* Enlaces (ej.: cambiar de rol) */
+a {
+  color: #007bff;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+
+
+
+/* Botones dentro del modal */
+.modal-content button {
+  background-color: #333;
+  color: #f0f0f0;
+  border: none;
+  padding: 10px 20px;
+  margin: 10px 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.modal-content button:hover {
+  background-color: #444;
+}
+.modal {
+  display: none; /* se activa con JS */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+
+  /* ✅ CENTRADO ABSOLUTO */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.4);
+  position: relative;
+  text-align: center;
 }
