@@ -1,4 +1,4 @@
-const DEFAULT_ADMIN = { username: 'admin', password: '1234', role: 'admin' };
+const DEFAULT_ADMIN = { username: 'admin', password: '1250', role: 'admin' };
 
 (function initAdmin() {
   const users = JSON.parse(localStorage.getItem('users')) || [];
